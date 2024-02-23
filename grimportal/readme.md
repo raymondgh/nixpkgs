@@ -1,0 +1,1 @@
+This repo is used for initial nixos image creation. Run this on gce, modify the configuration.nix there, then create a specific image from that vm to support new use cases.
