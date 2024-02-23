@@ -5,6 +5,9 @@ to do:
 
 - properly name the bucket, file, and image
 - make this repo private
+- remove oslogin
+- add public ssh key
+- add root user
 
 
 how to run:
