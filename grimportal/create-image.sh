@@ -12,7 +12,7 @@ if [ ! -e "$UNIQUE_FILE" ]; then
 fi
 
 set -euo pipefail
-
+IMAGE_NAME="nixos-base-image"
 BUCKET_NAME="nixos-base-image"
 TIMESTAMP="$(date +%Y%m%d%H%M)"
 export TIMESTAMP
@@ -25,7 +25,8 @@ nix-build '<nixpkgs/nixos/lib/eval-config.nix>' \
    -j 10
 
 img_path=$(echo gce/*.tar.gz)
-img_name=${IMAGE_NAME:-$(basename "$img_path")}
+# img_name=${IMAGE_NAME:-$(basename "$img_path")}
+img_name="${IMAGE_NAME}-${TIMESTAMP}.tar.gz"
 echo "img_name:"
 echo "$img_name"
 

@@ -3,11 +3,8 @@ This repo is used for initial nixos image creation. Run this on gce, modify the 
 
 to do:
 
-- properly name the bucket, file, and image
-- make this repo private
-- remove oslogin
-- add public ssh key
-- add root user
+- figure out how to get the resulting configuration.nix file
+- try out getting the game to run
 
 
 how to run:
