@@ -4,7 +4,7 @@
   # Sets this file to be the resulting runtime configuration.nix
   environment.etc."nixos/configuration.nix".source = ../grimportal/standard.nix;
 
-  # Declares the NixOS version
+  # Declares the NixOS version. Helps to avoid unnecessary upgrades and changes.
   system.stateVersion = "24.05";
 
   # Does some useful GCP GCE stuff
