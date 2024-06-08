@@ -1,43 +1,44 @@
-{ lib
-, aiohttp
-, aiomqtt
-, buildPythonPackage
-, cachetools
-, defusedxml
-, docker
-, fetchFromGitHub
-, numpy
-, pillow
-, pycountry
-, pytest-asyncio
-, pytestCheckHook
-, pythonOlder
-, setuptools
-, setuptools-scm
-, svg-py
-, testfixtures
+{
+  lib,
+  aiohttp,
+  aiomqtt,
+  buildPythonPackage,
+  cachetools,
+  defusedxml,
+  docker,
+  fetchFromGitHub,
+  numpy,
+  pillow,
+  pycountry,
+  pytest-asyncio,
+  pytestCheckHook,
+  pythonOlder,
+  setuptools,
+  setuptools-scm,
+  svg-py,
+  testfixtures,
 }:
 
 buildPythonPackage rec {
   pname = "deebot-client";
-  version = "5.2.2";
+  version = "7.3.0";
   pyproject = true;
 
-  disabled = pythonOlder "3.11";
+  disabled = pythonOlder "3.12";
 
   src = fetchFromGitHub {
     owner = "DeebotUniverse";
     repo = "client.py";
     rev = "refs/tags/${version}";
-    hash = "sha256-ybZ8f3tqhj0SPbwjtgTB45y4Tx/lIyNZ5vShYsbIrfU=";
+    hash = "sha256-zXe110cGrrnwZvQ3pI9Zka7bcuUS/Js+7A3k6OljAYI=";
   };
 
-  nativeBuildInputs = [
+  build-system = [
     setuptools
     setuptools-scm
   ];
 
-  propagatedBuildInputs = [
+  dependencies = [
     aiohttp
     aiomqtt
     cachetools
@@ -55,9 +56,7 @@ buildPythonPackage rec {
     testfixtures
   ];
 
-  pythonImportsCheck = [
-    "deebot_client"
-  ];
+  pythonImportsCheck = [ "deebot_client" ];
 
   disabledTests = [
     # Tests require running container

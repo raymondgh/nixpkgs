@@ -2,16 +2,16 @@
 
 buildGoModule rec {
   pname = "temporal";
-  version = "1.22.5";
+  version = "1.24.1";
 
   src = fetchFromGitHub {
     owner = "temporalio";
     repo = "temporal";
     rev = "v${version}";
-    hash = "sha256-PHdRyYOhNoJ6NpSKNbCF2hddZeY5mIF34HQP05n/sy0=";
+    hash = "sha256-GEmlmVTxQPoKsb9RtS6RcHY/0iDZsj3jG/Les2VPMAc=";
   };
 
-  vendorHash = "sha256-Aum5OsdJ69MkP8tXXGWa6IdouX6F4xKjD/ndAqShMhw=";
+  vendorHash = "sha256-u9xQFTwVKEGRPhBwcBgexCQhlNO91yP4m4vchCdBt9E=";
 
   excludedPackages = [ "./build" ];
 
@@ -45,7 +45,7 @@ buildGoModule rec {
     homepage = "https://temporal.io";
     changelog = "https://github.com/temporalio/temporal/releases/tag/v${version}";
     license = licenses.mit;
-    maintainers = with maintainers; [ titanous ];
+    maintainers = with maintainers; [ ];
     mainProgram = "temporal-server";
   };
 }

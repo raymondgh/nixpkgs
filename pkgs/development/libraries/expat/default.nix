@@ -15,13 +15,17 @@
 # cgit) that are needed here should be included directly in Nixpkgs as
 # files.
 
+let
+  version = "2.6.2";
+  tag = "R_${lib.replaceStrings ["."] ["_"] version}";
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "expat";
-  version = "2.5.0";
+  inherit version;
 
   src = fetchurl {
-    url = with finalAttrs; "https://github.com/libexpat/libexpat/releases/download/R_${lib.replaceStrings ["."] ["_"] version}/${pname}-${version}.tar.xz";
-    sha256 = "1gnwihpfz4x18rwd6cbrdggmfqjzwsdfh1gpmc0ph21c4gq2097g";
+    url = with finalAttrs; "https://github.com/libexpat/libexpat/releases/download/${tag}/${pname}-${version}.tar.xz";
+    hash = "sha256-7hS0xdiQixvsN62TdgfqsYPU2YBqCK3uRyw8MSHSc2Q=";
   };
 
   strictDeps = true;
@@ -61,8 +65,10 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   meta = with lib; {
+    changelog = "https://github.com/libexpat/libexpat/blob/${tag}/expat/Changes";
     homepage = "https://libexpat.github.io/";
     description = "A stream-oriented XML parser library written in C";
+    mainProgram = "xmlwf";
     platforms = platforms.all;
     license = licenses.mit; # expat version
     pkgConfigModules = [ "expat" ];

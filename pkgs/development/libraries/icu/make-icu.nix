@@ -1,11 +1,11 @@
-{ stdenv, lib, fetchurl, fixDarwinDylibNames, testers }:
+{ stdenv, lib, buildPackages, fetchurl, fixDarwinDylibNames, testers }:
 
-{ version, hash, patches ? [], patchFlags ? []
-# Cross-compiled icu4c requires a build-root of a native compile
-, buildRootOnly ? false, nativeBuildRoot
-}:
+{ version, hash, patches ? [], patchFlags ? [], withStatic ? stdenv.hostPlatform.isStatic }:
 
 let
+  # Cross-compiled icu4c requires a build-root of a native compile
+  nativeBuildRoot = buildPackages."icu${lib.versions.major version}".buildRootOnly;
+
   pname = "icu4c";
 
   baseAttrs = {
@@ -36,9 +36,12 @@ let
       sed -e 's/LDFLAGSICUDT=-nodefaultlibs -nostdlib/LDFLAGSICUDT=/' -i config/mh-linux
     '';
 
+    dontDisableStatic = withStatic;
+
     configureFlags = [ "--disable-debug" ]
       ++ lib.optional (stdenv.isFreeBSD || stdenv.isDarwin) "--enable-rpath"
-      ++ lib.optional (stdenv.buildPlatform != stdenv.hostPlatform) "--with-cross-build=${nativeBuildRoot}";
+      ++ lib.optional (stdenv.buildPlatform != stdenv.hostPlatform) "--with-cross-build=${nativeBuildRoot}"
+      ++ lib.optional withStatic "--enable-static";
 
     enableParallelBuilding = true;
 
@@ -58,7 +61,7 @@ let
   realAttrs = baseAttrs // {
     name = pname + "-" + version;
 
-    outputs = [ "out" "dev" ];
+    outputs = [ "out" "dev" ] ++ lib.optional withStatic "static";
     outputBin = "dev";
 
     # FIXME: This fixes dylib references in the dylibs themselves, but
@@ -66,7 +69,10 @@ let
     nativeBuildInputs = lib.optional stdenv.hostPlatform.isDarwin fixDarwinDylibNames;
 
     # remove dependency on bootstrap-tools in early stdenv build
-    postInstall = lib.optionalString stdenv.isDarwin ''
+    postInstall = lib.optionalString withStatic ''
+      mkdir -p $static/lib
+      mv -v lib/*.a $static/lib
+    '' + lib.optionalString stdenv.isDarwin ''
       sed -i 's/INSTALL_CMD=.*install/INSTALL_CMD=install/' $out/lib/icu/${version}/pkgdata.inc
     '' + (let
       replacements = [
@@ -75,6 +81,8 @@ let
         { from = "\${pkglibdir}/pkgdata.inc"; to = "${placeholder "dev"}/lib/icu/pkgdata.inc"; } # --incpkgdatafile
       ];
     in ''
+      rm $out/share/icu/${version}/install-sh $out/share/icu/${version}/mkinstalldirs # Avoid having a runtime dependency on bash
+
       substituteInPlace "$dev/bin/icu-config" \
         ${lib.concatMapStringsSep " " (r: "--replace '${r.from}' '${r.to}'") replacements}
     '');
@@ -99,10 +107,9 @@ let
     '';
   };
 
-  attrs = if buildRootOnly
-            then buildRootOnlyAttrs
-          else realAttrs;
+  mkWithAttrs = attrs: stdenv.mkDerivation (finalAttrs: attrs // {
+    passthru.tests.pkg-config = testers.testMetaPkgConfig finalAttrs.finalPackage;
+    passthru.buildRootOnly = mkWithAttrs buildRootOnlyAttrs;
+  });
 in
-stdenv.mkDerivation (finalAttrs: attrs // {
-  passthru.tests.pkg-config = testers.testMetaPkgConfig finalAttrs.finalPackage;
-})
+  mkWithAttrs realAttrs

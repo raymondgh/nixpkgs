@@ -1,8 +1,9 @@
-{ lib
-, fetchPypi
-, buildPythonPackage
-, setuptools
-, nosexcover
+{
+  lib,
+  fetchPypi,
+  buildPythonPackage,
+  setuptools,
+  pytestCheckHook,
 }:
 
 buildPythonPackage rec {
@@ -15,13 +16,11 @@ buildPythonPackage rec {
     hash = "sha256-jXkCjqbMEx2l6rCZpdlamY1DxneZVv/+O0VQQJEQdto=";
   };
 
-  nativeBuildInputs = [
-    setuptools
-  ];
+  build-system = [ setuptools ];
 
-  nativeCheckInputs = [
-    nosexcover
-  ];
+  pythonImportsCheck = [ "smmap" ];
+
+  nativeCheckInputs = [ pytestCheckHook ];
 
   meta = {
     description = "A pure python implementation of a sliding window memory map manager";

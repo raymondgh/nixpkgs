@@ -10,23 +10,23 @@
 , darwin
 , libiconv
 , installShellFiles
-  # once eza upstream gets support for setting up a compatibilty symlink for exa, we should change
+  # once eza upstream gets support for setting up a compatibility symlink for exa, we should change
   # the handling here from postInstall to passing the required argument to the builder.
 , exaAlias ? true
 }:
 
 rustPlatform.buildRustPackage rec {
   pname = "eza";
-  version = "0.18.4";
+  version = "0.18.17";
 
   src = fetchFromGitHub {
     owner = "eza-community";
     repo = "eza";
     rev = "v${version}";
-    hash = "sha256-G8Ow38vNSMMYINYhGp33rls5AV4EFZDEJhkNn5H64LA=";
+    hash = "sha256-ig1sLcWEwzF8PnqDoeC103kC6l6SINtZQdJcLiTe5fw=";
   };
 
-  cargoHash = "sha256-A/EIkWSdMqSdrnjMTfIdg0scSBK/xsI5PPsOn+cRogA=";
+  cargoHash = "sha256-C1xaSdM3mtIk8moOP8drDpdFDs9pYk+ChyI5il5RaqE=";
 
   nativeBuildInputs = [ cmake pkg-config installShellFiles pandoc ];
   buildInputs = [ zlib ]

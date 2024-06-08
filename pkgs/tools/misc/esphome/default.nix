@@ -19,14 +19,14 @@ let
 in
 python.pkgs.buildPythonApplication rec {
   pname = "esphome";
-  version = "2024.2.0";
+  version = "2024.5.4";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = pname;
     repo = pname;
     rev = "refs/tags/${version}";
-    hash = "sha256-k8caA5Q4QcP7H1Nn5yvFsfExVwipAlFSb/DphkzYNtU=";
+    hash = "sha256-UxNMHRQLrViK9ssFc0vHA/zqNw5yH8E6n+OAnq6vJdQ=";
   };
 
   nativeBuildInputs = with python.pkgs; [
@@ -41,6 +41,12 @@ python.pkgs.buildPythonApplication rec {
   postPatch = ''
     # drop coverage testing
     sed -i '/--cov/d' pytest.ini
+
+    # ensure component dependencies are available
+    cat requirements_optional.txt >> requirements.txt
+    # relax strict runtime version check
+    substituteInPlace esphome/components/font/__init__.py \
+      --replace-fail "10.2.0" "${python.pkgs.pillow.version}"
   '';
 
   # Remove esptool and platformio from requirements
@@ -55,12 +61,14 @@ python.pkgs.buildPythonApplication rec {
   propagatedBuildInputs = with python.pkgs; [
     aioesphomeapi
     argcomplete
+    cairosvg
     click
     colorama
     cryptography
     esphome-dashboard
-    kconfiglib
     icmplib
+    kconfiglib
+    packaging
     paho-mqtt
     pillow
     platformio
@@ -70,6 +78,7 @@ python.pkgs.buildPythonApplication rec {
     python-magic
     pyyaml
     requests
+    ruamel-yaml
     tornado
     tzdata
     tzlocal
@@ -96,13 +105,6 @@ python.pkgs.buildPythonApplication rec {
     pytest-asyncio
     pytest-mock
     pytestCheckHook
-  ];
-
-  disabledTestPaths = [
-    # requires hypothesis 5.49, we have 6.x
-    # ImportError: cannot import name 'ip_addresses' from 'hypothesis.provisional'
-    "tests/unit_tests/test_core.py"
-    "tests/unit_tests/test_helpers.py"
   ];
 
   postCheck = ''

@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   pname = "flow";
-  version = "0.229.1";
+  version = "0.237.0";
 
   src = fetchFromGitHub {
     owner = "facebook";
     repo = "flow";
     rev = "v${version}";
-    hash = "sha256-zovtSY37f7WKwE0Mjl9Vc+RcYjqMRhPHafN50XAj5cE=";
+    hash = "sha256-VXjWaxQUtkGpxGD70muoEfasfruSA50obr8CQvLRiyM=";
   };
 
   postPatch = ''
@@ -16,11 +16,6 @@ stdenv.mkDerivation rec {
   '';
 
   makeFlags = [ "FLOW_RELEASE=1" ];
-
-  # Work around https://github.com/NixOS/nixpkgs/issues/166205.
-  env = lib.optionalAttrs stdenv.cc.isClang {
-    NIX_LDFLAGS = "-l${stdenv.cc.libcxx.cxxabi.libName}";
-  };
 
   installPhase = ''
     install -Dm755 bin/flow $out/bin/flow
@@ -36,10 +31,11 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "A static type checker for JavaScript";
+    mainProgram = "flow";
     homepage = "https://flow.org/";
     changelog = "https://github.com/facebook/flow/blob/v${version}/Changelog.md";
     license = licenses.mit;
     platforms = ocamlPackages.ocaml.meta.platforms;
-    maintainers = with maintainers; [ marsam puffnfresh ];
+    maintainers = with maintainers; [ puffnfresh ];
   };
 }

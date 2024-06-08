@@ -33,11 +33,11 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "apt";
-  version = "2.7.12";
+  version = "2.9.4";
 
   src = fetchurl {
     url = "mirror://debian/pool/main/a/apt/apt_${finalAttrs.version}.tar.xz";
-    hash = "sha256-5G0Wa1/Ih8LZvKet1+DM2lR7lit2LhJyoIwEJrqpnK8=";
+    hash = "sha256-Ra6jeJM7nkaPZWBR7Sv8+TurArs1D5TodUcn6xe0B6Q=";
   };
 
   # cycle detection; lib can't be split

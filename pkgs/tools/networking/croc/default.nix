@@ -2,16 +2,16 @@
 
 buildGoModule rec {
   pname = "croc";
-  version = "9.6.11";
+  version = "10.0.7";
 
   src = fetchFromGitHub {
     owner = "schollz";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-iePSDd/CR+YRRbUUszAU8v1oaf7s4kgX1cjTU+WVmOs=";
+    hash = "sha256-8sC3v59ODNdR3W3spAJi5ZgcQirFVvC3RsfJz9QjRBg=";
   };
 
-  vendorHash = "sha256-pUWUYV1Ts/dFXUzufIWt5ETRQVpxIGzxRFq9jviG0Fs=";
+  vendorHash = "sha256-o/8TFAiee7ANSOFxTCFY9fDS4WOOO4IKQfjiMCXUf8w=";
 
   subPackages = [ "." ];
 
@@ -20,6 +20,7 @@ buildGoModule rec {
       local-relay = callPackage ./test-local-relay.nix { };
     };
   };
+
   meta = with lib; {
     description = "Easily and securely send things from one computer to another";
     longDescription = ''

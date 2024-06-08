@@ -15,7 +15,7 @@
 , re2
 , zlib
 , microsoft-gsl
-, iconv
+, libiconv
 , protobuf_21
 , pythonSupport ? true
 , cudaSupport ? config.cudaSupport
@@ -69,16 +69,6 @@ let
     rev = "v1.12.0";
     hash = "sha256-L1B5Y/c897Jg9fGwT2J3+vaXsZ+lfXnskp8Gto1p/Tg=";
   };
-
-  gtest' = gtest.overrideAttrs (oldAttrs: rec {
-    version = "1.13.0";
-    src = fetchFromGitHub {
-      owner = "google";
-      repo = "googletest";
-      rev = "v${version}";
-      hash = "sha256-LVLEn+e7c8013pwiLzJiiIObyrlbBHYaioO/SWbItPQ=";
-    };
-  });
 
   onnx = fetchFromGitHub {
     owner = "onnx";
@@ -143,13 +133,12 @@ effectiveStdenv.mkDerivation rec {
     nlohmann_json
     microsoft-gsl
   ] ++ lib.optionals pythonSupport (with python3Packages; [
-    gtest'
     numpy
     pybind11
     packaging
   ]) ++ lib.optionals effectiveStdenv.isDarwin [
     Foundation
-    iconv
+    libiconv
   ] ++ lib.optionals cudaSupport (with cudaPackages; [
     cuda_cccl # cub/cub.cuh
     libcublas # cublas_v2.h
@@ -160,7 +149,9 @@ effectiveStdenv.mkDerivation rec {
     cuda_cudart
   ]);
 
-  nativeCheckInputs = lib.optionals pythonSupport (with python3Packages; [
+  nativeCheckInputs = [
+    gtest
+  ] ++ lib.optionals pythonSupport (with python3Packages; [
     pytest
     sympy
     onnx
@@ -189,7 +180,7 @@ effectiveStdenv.mkDerivation rec {
     "-DFETCHCONTENT_SOURCE_DIR_SAFEINT=${safeint}"
     "-DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=ALWAYS"
     "-Donnxruntime_BUILD_SHARED_LIB=ON"
-    "-Donnxruntime_BUILD_UNIT_TESTS=ON"
+    (lib.cmakeBool "onnxruntime_BUILD_UNIT_TESTS" doCheck)
     "-Donnxruntime_ENABLE_LTO=ON"
     "-Donnxruntime_USE_FULL_PROTOBUF=OFF"
     (lib.cmakeBool "onnxruntime_USE_CUDA" cudaSupport)
@@ -197,9 +188,10 @@ effectiveStdenv.mkDerivation rec {
   ] ++ lib.optionals pythonSupport [
     "-Donnxruntime_ENABLE_PYTHON=ON"
   ] ++ lib.optionals cudaSupport [
-    (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_CUTLASS" cutlass)
-    (lib.cmakeFeature "onnxruntime_CUDNN_HOME" cudaPackages.cudnn)
+    (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_CUTLASS" "${cutlass}")
+    (lib.cmakeFeature "onnxruntime_CUDNN_HOME" "${cudaPackages.cudnn}")
     (lib.cmakeFeature "CMAKE_CUDA_ARCHITECTURES" cudaArchitecturesString)
+    (lib.cmakeFeature "onnxruntime_NVCC_THREADS" "1")
   ];
 
   env = lib.optionalAttrs effectiveStdenv.cc.isClang {
@@ -234,6 +226,7 @@ effectiveStdenv.mkDerivation rec {
   '';
 
   passthru = {
+    inherit cudaSupport cudaPackages; # for the python module
     protobuf = protobuf_21;
     tests = lib.optionalAttrs pythonSupport {
       python = python3Packages.onnxruntime;
